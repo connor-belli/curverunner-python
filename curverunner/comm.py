@@ -241,7 +241,7 @@ def discover_devices_serial_by_id() -> List[Tuple[int, str]]:
 
                 version = comm.read1(1)
                 cr_list.append((version, port_info.device))
-        except (RuntimeError, serial.SerialException) as _:
+        except (RuntimeError, serial.SerialException, ValueError) as _:
             continue
 
     return cr_list
