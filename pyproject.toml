@@ -7,19 +7,22 @@ build-backend = "setuptools.build_meta"
 name = "curverunner"
 dynamic = ["version"]
 readme = "README.md"
+description = "Python library for interfacing with the Curverunner motor controller."
 classifiers = [
     "Intended Audience :: Science/Research",
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Hardware"
 ]
 authors = [
-    {name = "Allen Institute for Artificial Intelligence", email = "contact@allenai.org"}
+    {name = "Connor Belli", email = "connorbelli2003@gmail.com"}
 ]
 requires-python = ">=3.8"
 dependencies = [
-  # Add your own dependencies here
+  "pyserial>=3.5",
+  "smbus2>=0.5"
 ]
 license = {file = "LICENSE"}
 
@@ -65,10 +68,10 @@ exclude = [
 include-package-data = true
 
 [tool.setuptools.package-data]
-my_package = ["py.typed"]
+curverunner = ["py.typed"]
 
 [tool.setuptools.dynamic]
-version = {attr = "my_package.version.VERSION"}
+version = {attr = "curverunner.version.VERSION"}
 
 [tool.black]
 line-length = 100
