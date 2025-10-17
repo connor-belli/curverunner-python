@@ -1,15 +1,4 @@
-import struct
-import time
-from typing import List, Dict, Tuple
-
-import serial
-from serial.tools.list_ports import comports
-import threading
-import smbus2
-
-from abc import ABC, abstractmethod
-
-from curverunner.comm import CurverunnerComm, CurverunnerCommSerial, discover_devices_serial
+from curverunner.comm import CurverunnerComm
 from curverunner.util import INT16_MAX, map_value, unsigned_to_signed2, unsigned_to_signed4
 
 
