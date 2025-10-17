@@ -51,7 +51,7 @@ class CurverunnerServo:
         Returns:
             float: The current servo angle in degrees.
         """
-        val = self._comm.read1(self._servo_addr)
+        val = self._comm.read2(self._servo_addr)
         degrees = map_value(
             val,
             self.SERVO_PORT_MIN_VAL,
