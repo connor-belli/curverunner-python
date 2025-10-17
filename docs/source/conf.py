@@ -23,8 +23,8 @@ from curverunner import VERSION, VERSION_SHORT  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 project = "curverunner"
-copyright = f"{datetime.today().year}, Allen Institute for Artificial Intelligence"
-author = "Allen Institute for Artificial Intelligence"
+copyright = f"{datetime.today().year}, Connor Belli"
+author = "Connor Belli"
 version = VERSION_SHORT
 release = VERSION
 
