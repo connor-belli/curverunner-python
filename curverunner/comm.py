@@ -12,7 +12,7 @@ from abc import ABC, abstractmethod
 from curverunner.util import INT16_MAX, map_value, unsigned_to_signed2, unsigned_to_signed4
 
 
-class CurveRunnerComm(ABC):
+class CurverunnerComm(ABC):
     """
     Abstract base class for communication with CurveRunner device.
 
@@ -44,7 +44,7 @@ class CurveRunnerComm(ABC):
         pass
 
 
-class CurveRunnerCommI2C(CurveRunnerComm):
+class CurverunnerCommI2C(CurverunnerComm):
     def __init__(self, bus: smbus2.SMBus, addr: int = 0x08):
         self._bus = bus
         self._addr = addr
@@ -94,7 +94,7 @@ class CurveRunnerCommI2C(CurveRunnerComm):
         return self._read(addr, 4)
 
 
-class CurverunnerCommSerial(CurveRunnerComm):
+class CurverunnerCommSerial(CurverunnerComm):
     def __init__(self, ser: str | serial.Serial | None = None):
         """_summary_
 
@@ -191,7 +191,7 @@ class CurverunnerCommSerial(CurveRunnerComm):
             raise
 
 
-class CurveRunnerCommMock(CurveRunnerComm):
+class CurverunnerCommMock(CurverunnerComm):
     def __init__(self):
         self._regs = bytearray(256)
 

@@ -9,11 +9,11 @@ import smbus2
 
 from abc import ABC, abstractmethod
 
-from curverunner.comm import CurveRunnerComm, CurverunnerCommSerial, discover_devices_serial
+from curverunner.comm import CurverunnerComm, CurverunnerCommSerial, discover_devices_serial
 from curverunner.util import INT16_MAX, map_value, unsigned_to_signed2, unsigned_to_signed4
 
 
-class CurveRunnerServo:
+class CurverunnerServo:
     SERVO_ANGLE_ADDRESSES = [3, 5, 7]
 
     SERVO_MIN_ANGLE = 0
@@ -22,7 +22,7 @@ class CurveRunnerServo:
     SERVO_PORT_MIN_VAL = 0
     SERVO_PORT_MAX_VAL = 1800
 
-    def __init__(self, comm: CurveRunnerComm, servo_port: int = 1):
+    def __init__(self, comm: CurverunnerComm, servo_port: int = 1):
         self._comm = comm
         if servo_port < 1 or servo_port > 3:
             raise ValueError("Servo port must be between 1 and 3")
@@ -73,7 +73,7 @@ class CurveRunnerServo:
         return degrees
 
 
-class CurveRunnerMotor:
+class CurverunnerMotor:
     REG_OFFSET_MOTOR_TYPE = 0
     REG_OFFSET_PULSES_PER_REV = 1
     REG_OFFSET_MOTOR_INVERTED = 3
@@ -103,7 +103,7 @@ class CurveRunnerMotor:
 
     MOTOR_BASE_ADDRS = [15, 0]
 
-    def __init__(self, comm: CurveRunnerComm, motor_port: int = 1):
+    def __init__(self, comm: CurverunnerComm, motor_port: int = 1):
         if motor_port < 1 or motor_port > 2:
             raise ValueError("Motor port must be between 1 and 2")
         self.motor_port = motor_port
@@ -201,13 +201,13 @@ class Curverunner:
     COMMAND_FACTORY_RESET = 3
     COMMAND_SET_DEVICE_ID = 4
 
-    def __init__(self, comm: CurveRunnerComm):
+    def __init__(self, comm: CurverunnerComm):
         self.comm = comm
-        self.servo1 = CurveRunnerServo(comm, 1)
-        self.servo2 = CurveRunnerServo(comm, 2)
-        self.servo3 = CurveRunnerServo(comm, 3)
+        self.servo1 = CurverunnerServo(comm, 1)
+        self.servo2 = CurverunnerServo(comm, 2)
+        self.servo3 = CurverunnerServo(comm, 3)
 
-        self.motor1 = CurveRunnerMotor(comm, 1)
+        self.motor1 = CurverunnerMotor(comm, 1)
 
     def get_device_id(self) -> int:
         return self.comm.read1(self.REG_DEVICE_ID)

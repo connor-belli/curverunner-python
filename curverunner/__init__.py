@@ -1,24 +1,24 @@
 from .version import VERSION, VERSION_SHORT
 
 from .comm import (
-    CurveRunnerComm,
+    CurverunnerComm,
     CurverunnerCommSerial,
-    CurveRunnerCommMock,
+    CurverunnerCommMock,
     discover_devices_serial,
     discover_devices_serial_by_id,
 )
-from .curverunner import Curverunner, CurveRunnerMotor, CurveRunnerServo
+from .curverunner import Curverunner, CurverunnerMotor, CurverunnerServo
 
 __version__ = VERSION
 __version_short__ = VERSION_SHORT
 
 __all__ = [
     "Curverunner",
-    "CurveRunnerMotor",
-    "CurveRunnerServo",
-    "CurveRunnerComm",
+    "CurverunnerMotor",
+    "CurverunnerServo",
+    "CurverunnerComm",
     "CurverunnerCommSerial",
-    "CurveRunnerCommMock",
+    "CurverunnerCommMock",
     "discover_devices_serial",
     "discover_devices_serial_by_id",
 ]
