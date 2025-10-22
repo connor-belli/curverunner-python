@@ -222,7 +222,7 @@ class CurverunnerMotor:
         pulses_per_sec = self.get_velocity_raw()
         rads = (pulses_per_sec / self._pulses_per_rev) * (2 * math.pi)
         return rads
-    
+
     def get_velocity_rads(self) -> float:
         """Gets the current velocity in radians per second (rad/s).
 
@@ -232,7 +232,7 @@ class CurverunnerMotor:
         pulses_per_sec = self.get_velocity_raw()
         rads = (pulses_per_sec / self._pulses_per_rev) * (2 * math.pi)
         return rads
-    
+
     def get_position_rads(self) -> float:
         """Gets the current position in radians.
 
@@ -242,6 +242,7 @@ class CurverunnerMotor:
         pulses = self.get_position_raw()
         rads = (pulses / self._pulses_per_rev) * (2 * math.pi)
         return rads
+
 
 class Curverunner:
     REG_VERSION = 0
