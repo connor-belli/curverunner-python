@@ -1,16 +1,8 @@
-import struct
-import time
-from typing import List, Dict, Tuple
-
-import serial
-from serial.tools.list_ports import comports
-import threading
-import smbus2
-
-from abc import ABC, abstractmethod
-
-from curverunner.comm import CurverunnerComm, CurverunnerCommSerial, discover_devices_serial
+import math
+from curverunner.comm import CurverunnerComm
 from curverunner.util import INT16_MAX, map_value, unsigned_to_signed2, unsigned_to_signed4
+
+INT_16_MAX = (1 << 15) - 1
 
 
 class CurverunnerServo:
@@ -62,7 +54,7 @@ class CurverunnerServo:
         Returns:
             float: The current servo angle in degrees.
         """
-        val = self._comm.read1(self._servo_addr)
+        val = self._comm.read2(self._servo_addr)
         degrees = map_value(
             val,
             self.SERVO_PORT_MIN_VAL,
@@ -101,7 +93,7 @@ class CurverunnerMotor:
     CONTROL_MODE_VELOCITY = 2
     CONTROL_MODE_POSITION = 3
 
-    MOTOR_BASE_ADDRS = [15, 0]
+    MOTOR_BASE_ADDRS = [15, 43]
 
     def __init__(self, comm: CurverunnerComm, motor_port: int = 1):
         if motor_port < 1 or motor_port > 2:
@@ -109,22 +101,22 @@ class CurverunnerMotor:
         self.motor_port = motor_port
         self._base_addr = self.MOTOR_BASE_ADDRS[motor_port - 1]
         self._comm = comm
+        self._pulses_per_rev = self.update_pulses_per_rev()
 
     def set_percent_out(self, percent_out: float):
-        INT_16_MAX = (1 << 15) - 1
         if percent_out < -1:
             percent_out = -1
         elif percent_out > 1:
             percent_out = 1
 
         # convert to
-        percent_out_write = int(percent_out * INT_16_MAX + INT_16_MAX)
+        percent_out_write = int(percent_out * INT_16_MAX)
         self._comm.write2(self._base_addr + self.REG_OFFSET_TARGET, percent_out_write)
         self._comm.write2(
             self._base_addr + self.REG_OFFSET_CONTROL_MODE, int(self.CONTROL_MODE_PERCENT_OUTPUT)
         )
 
-    def set_target_velocity(self, velocity: int):
+    def set_target_velocity_raw(self, velocity: int):
         vel = int(velocity)
         self._comm.write2(self._base_addr + self.REG_OFFSET_TARGET, vel)
         self._comm.write2(
@@ -187,6 +179,70 @@ class CurverunnerMotor:
     def get_motor_inverted(self) -> bool:
         return self._comm.read1(self._base_addr + self.REG_OFFSET_MOTOR_INVERTED) == 1
 
+    def get_slew_rate(self) -> float:
+        return self._comm.read2(self._base_addr + self.REG_OFFSET_SLEW_RATE) / self.PIDF_SCALE
+
+    def set_slew_rate(self, rate: float):
+        if rate < 0:
+            raise ValueError("Slew rate must be non-negative")
+
+        self._comm.write2(self._base_addr + self.REG_OFFSET_SLEW_RATE, int(rate * self.PIDF_SCALE))
+
+    def get_pulses_per_rev(self) -> int:
+        return self._pulses_per_rev
+
+    def set_pulses_per_rev(self, ppr: int):
+        if ppr <= 1:
+            raise ValueError("Pulses per revolution must be greater than 1")
+        self._pulses_per_rev = ppr
+        self._comm.write2(self._base_addr + self.REG_OFFSET_PULSES_PER_REV, ppr)
+
+    # HIGH LEVEL METHODS
+
+    def update_pulses_per_rev(self) -> int:
+        """Reads and updates the pulses per revolution from the motor controller."""
+        self._pulses_per_rev = self._comm.read2(self._base_addr + self.REG_OFFSET_PULSES_PER_REV)
+        return self._pulses_per_rev
+
+    def set_target_velocity_rads(self, rads: float):
+        """Sets the target velocity in radians per second (rad/s).
+
+        Args:
+            rads (float): The desired velocity in rad/s.
+        """
+        pulses_per_sec = (rads / (2 * math.pi)) * self._pulses_per_rev
+        self.set_target_velocity_raw(int(pulses_per_sec))
+
+    def get_target_velocity_rads(self) -> float:
+        """Gets the current velocity in radians per second (rad/s).
+
+        Returns:
+            float: The current velocity in rad/s.
+        """
+        pulses_per_sec = self.get_velocity_raw()
+        rads = (pulses_per_sec / self._pulses_per_rev) * (2 * math.pi)
+        return rads
+
+    def get_velocity_rads(self) -> float:
+        """Gets the current velocity in radians per second (rad/s).
+
+        Returns:
+            float: The current velocity in rad/s.
+        """
+        pulses_per_sec = self.get_velocity_raw()
+        rads = (pulses_per_sec / self._pulses_per_rev) * (2 * math.pi)
+        return rads
+
+    def get_position_rads(self) -> float:
+        """Gets the current position in radians.
+
+        Returns:
+            float: The current position in radians.
+        """
+        pulses = self.get_position_raw()
+        rads = (pulses / self._pulses_per_rev) * (2 * math.pi)
+        return rads
+
 
 class Curverunner:
     REG_VERSION = 0
@@ -208,6 +264,7 @@ class Curverunner:
         self.servo3 = CurverunnerServo(comm, 3)
 
         self.motor1 = CurverunnerMotor(comm, 1)
+        self.motor2 = CurverunnerMotor(comm, 2)
 
     def get_device_id(self) -> int:
         return self.comm.read1(self.REG_DEVICE_ID)

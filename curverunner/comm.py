@@ -1,6 +1,5 @@
-import struct
 import time
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 
 import serial
 from serial.tools.list_ports import comports
@@ -9,7 +8,6 @@ import smbus2
 
 from abc import ABC, abstractmethod
 
-from curverunner.util import INT16_MAX, map_value, unsigned_to_signed2, unsigned_to_signed4
 
 
 class CurverunnerComm(ABC):
@@ -243,7 +241,7 @@ def discover_devices_serial_by_id() -> List[Tuple[int, str]]:
 
                 version = comm.read1(1)
                 cr_list.append((version, port_info.device))
-        except:
+        except (RuntimeError, serial.SerialException, ValueError) as _:
             continue
 
     return cr_list
